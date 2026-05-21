@@ -1,8 +1,12 @@
 from functions.get_files_info import get_files_info
 
-#test_dir = [".", "/bin", "../", "main.py"]
-test_dir = ["."]
+test_dir = [".", "pkg", "/bin", "../"]
+
 
 for dir in test_dir: 
-    test_res = get_files_info("calculator", dir)
-    print(test_res)
+    if dir == ".":
+        print(f"Results for current directory:")
+    else:
+        print(f"Results for '{dir}' directory:")
+
+    print(get_files_info("calculator", dir))
