@@ -12,8 +12,12 @@ def get_files_info(working_directory: str, directory: str = ".") -> str:
             return f'Error: "{directory}" is not a directory'
 
         return f'Success: "{directory}" is within the working directory'
-
         
+        for i in os.listdir(target_dir):
+            return i 
+            print(i)
+
     except Exception as e: 
         return f'Error: {e}'
     
+
