@@ -1,12 +1,14 @@
 from functions.get_files_info import get_files_info
 
-test_dir = [".", "pkg", "/bin", "../"]
+test_cases = [
+    ("current directory", "."),
+    ("'pkg' directory", "pkg"),
+    ("'/bin' directory", "/bin"),
+    ("'../' directory", "../"),
+]
 
 
-for dir in test_dir: 
-    if dir == ".":
-        print(f"Results for current directory:")
-    else:
-        print(f"Results for '{dir}' directory:")
 
-    print(get_files_info("calculator", dir))
+for label, directory in test_cases: 
+    print(f"Result for {label}:")
+    print(get_files_info("calculator", directory))
