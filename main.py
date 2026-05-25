@@ -5,25 +5,34 @@ from google import genai
 from google.genai import types
 
 from prompts import system_prompt
+from call_function import available_functions
 
 #Load enviroment variables 
 load_dotenv()
 
-def generate_content(client: genai.Client, messages: list[types.Content]) -> tuple[int, int, str]:
+config = types.GenerateContentConfig(
+    tools=[available_functions], system_instruction=system_prompt
+)
+
+def generate_content(client: genai.Client, messages: list[types.Content], verbose: bool):
     response = client.models.generate_content(
         model='gemini-2.5-flash',
         contents=messages,
-        config=types.GenerateContentConfig(system_instruction=system_prompt)
+        config = config
     )
 
     if not response.usage_metadata: 
         raise RuntimeError("Gemini API response appears to be malformed")
     
-    return (
-        response.usage_metadata.prompt_token_count,
-        response.usage_metadata.candidates_token_count,
-        response.text,
-        )
+    if verbose is True:
+        print(f"User prompt: {messages}")
+        print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
+        print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+        print(response.text)
+    
+    for function_call in response.function_calls:
+        print(f"Calling function: {function_call.name}({function_call.args})")
+   
 
     
 
@@ -45,15 +54,10 @@ def main():
     ]
 
     client = genai.Client(api_key=api_key)
-    prompt_tokens, response_tokens, response_text = generate_content(client, messages)
-    if args.verbose:
-        print(f"User prompt: {args.user_prompt}")
-        print(f"Prompt tokens: {prompt_tokens}")
-        print(f"Response tokens: {response_tokens}")
-
-    print(f"Response:") 
-    print(response_text)
     
+    generate_content(client, messages, args.verbose)
+    
+
 
 
 
