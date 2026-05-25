@@ -4,13 +4,16 @@ import argparse
 from google import genai
 from google.genai import types
 
+from prompts import system_prompt
+
 #Load enviroment variables 
 load_dotenv()
 
 def generate_content(client: genai.Client, messages: list[types.Content]) -> tuple[int, int, str]:
     response = client.models.generate_content(
         model='gemini-2.5-flash',
-        contents= messages,
+        contents=messages,
+        config=types.GenerateContentConfig(system_instruction=system_prompt)
     )
 
     if not response.usage_metadata: 
