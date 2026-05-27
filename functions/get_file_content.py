@@ -2,7 +2,7 @@ import os
 from config import MAX_CHARS
 from google.genai import types
 
-schema_get_files_info = types.FunctionDeclaration(
+schema_get_files_content = types.FunctionDeclaration(
     name="get_file_content",
     description="Read the file contents in specified file relative to the working directory, providing the file contents",
     parameters=types.Schema(
