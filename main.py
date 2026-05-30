@@ -32,23 +32,25 @@ def generate_content(client: genai.Client, messages: list[types.Content], verbos
         print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
         print(response.text)
     
-    for function_call in response.function_calls:
-        function_call_result = call_function(function_call,verbose)
-        if not function_call_result.parts: 
-            raise Exception("empty list")
-        
-        if function_call_result.parts[0].function_response is None:
-            raise Exception("Missing FunctionResponse object")
-        
-        if function_call_result.parts[0].function_response.response is None:
-            raise Exception("Missing response")
+    function_responses = []
+    if response.function_calls: 
+        for function_call in response.function_calls:
+            function_call_result = call_function(function_call,verbose)
+            if not function_call_result.parts: 
+                raise Exception("empty list")
+            
+            if function_call_result.parts[0].function_response is None:
+                raise Exception("Missing FunctionResponse object")
+            
+            if function_call_result.parts[0].function_response.response is None:
+                raise Exception("Missing response")
 
-        function_responses = []
-        function_responses.append(function_call_result.parts[0])
+            function_responses.append(function_call_result.parts[0])
 
-        if verbose is True:
-            print(f"-> {function_call_result.parts[0].function_response.response}")
-    
+            if verbose is True:
+                print(f"-> {function_call_result.parts[0].function_response.response}")
+        
+    return response, function_responses
 
 def main():
     parser = argparse.ArgumentParser(description="Chatbot")
@@ -60,7 +62,7 @@ def main():
 
     api_key = os.environ.get("GEMINI_API_KEY")
 
-    if api_key is None: 
+    if not api_key: 
         raise RuntimeError("Missing API key")
 
     messages: list[types.Content] = [
@@ -68,11 +70,22 @@ def main():
     ]
 
     client = genai.Client(api_key=api_key)
-    
-    generate_content(client, messages, args.verbose)
-    
 
+    for _ in range(20):
+        response, function_responses = generate_content(client, messages, args.verbose)
+        response.candidates
+        if response.candidates:
+            for candidate in response.candidates:
+                messages.append(candidate.content)
+            
+            
 
+            if not response.function_calls:
+                print("Final response:")
+                print(f"{response.text}")
+                break 
+
+            messages.append(types.Content(role="user", parts=function_responses))
 
 
 
